@@ -84,7 +84,8 @@ def extract_Feature_audio(songname, genre='_'):
 def gen_header_csv():
     header = 'filename chroma_stft_mean chroma_stft_var rms_mean rms_var spectral_centroid_mean spectral_centroid_var spectral_bandwidth_mean spectral_bandwidth_var rolloff_mean rolloff_var zero_crossing_rate_mean zero_crossing_rate_var harmony_mean harmony_var perceptr_mean perceptr_var tempo'
     for i in range(1, 21):
-        header += f' mfcc{i}'
+        header += f' mfcc{i}_mean'
+        header += f' mfcc{i}_var'
     header += ' label'
     header = header.split()
     return header
@@ -109,8 +110,8 @@ def extract_Feature_audio_toCSV(genre_music_path, csv_file, genres):
                 data_predict = []
                 for i in range(sections*10):
                     trypre = GetFeatureSection(file_name, genre, i, y, sr).split()
-                    trypre = trypre[1:-1]
-                    trypre = np.array(trypre, dtype = float)
+                    # trypre = trypre[1:-1]
+                    trypre = np.array(trypre)#, dtype = float)
                     data_predict.append(trypre)
                 # file = open(csv_file, 'w', newline='')
                 # with file:
