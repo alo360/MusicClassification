@@ -61,6 +61,8 @@ def get_feature_mfcc(filenames, n_mfcc=13, n_fft=2048,
     else:
         # load audio file
         signal, sr = librosa.load(filenames, sr=SAMPLE_RATE, duration=30)
+        if librosa.get_duration(y=signal, sr=sr) <30:
+            return data
         for s in range(num_segments):
             start_sample = samples_ps * s
             finish_sample = start_sample + samples_ps
@@ -189,6 +191,8 @@ def get_CNN_model(input_shape):
 
 def predict_cnn(filepath, model, num_segments=10):
     extractaudio_features = get_feature_mfcc(filepath, num_segments=num_segments)
+    if len(extractaudio_features["mfcc"]) == 0:
+        return 'none'
     extractaudio_features = np.array(extractaudio_features["mfcc"])
     extractaudio_features = extractaudio_features[..., np.newaxis]
     prediction = model.predict(extractaudio_features)
