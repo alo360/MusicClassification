@@ -20,6 +20,9 @@ from tensorflow.keras.layers import *
 
 from codeFeature.feature_extractor_cnn import *
 from codeFeature.file_split import *
+from pathlib import Path
+
+
 
 dataset_path = r"./genres_original"
 json_path = r"./class_xls/data.json"
@@ -38,6 +41,12 @@ SAMPLES_PER_TRACK = SAMPLE_RATE * DURATION
 adam = optimizers.Adam(lr=1e-4)
 genres, nb_train_samples = GetGenre(dataset_path)
 predict_list = []
+genres_np = np.array(genres)
+
+def read_markdown_file(markdown_file):
+    text = Path(markdown_file).read_text()
+    text = text.replace("![Screenshot](", "![Screenshot](http://localhost:8501/")
+    return text
 
 def load_model(path, weigth):
     return load__cnn_model(path, weigth)
@@ -67,21 +76,36 @@ def remove_file_dir(dir):
         except OSError:
             os.remove(path_file)
 
+@st.cache(allow_output_mutation=True)
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+@st.cache(allow_output_mutation=True)
+def get_img_with_href(local_img_path, target_url):
+    img_format = os.path.splitext(local_img_path)[-1].replace('.', '')
+    bin_str = get_base64_of_bin_file(local_img_path)
+    html_code = f'''
+        <a href="{target_url}">
+            <img src="data:image/{img_format};base64,{bin_str}" />
+        </a>'''
+    return html_code
+
+
+
 menu = ["Home","Play Music","About me"]
 choice = st.sidebar.selectbox("What ", menu)
 
+
+
 if choice =="Home":
     st.header("Hello Music Genre Classification")
-    st.markdown(''' 
-        - Music Genre Classification – Automatically classify different musical genres. In this tutorial we are going to develop a deep learning project to automatically classify different musical genres from audio files. We will classify these audio files using their low-level features of frequency and time domain. For this project we need a dataset of audio tracks having similar size and similar frequency range. GTZAN genre classification dataset is the most recommended dataset for the music genre classification project and it was collected for this task only.
-        ![image info](image_music/Description/Flow.png)
-        
-            ``` 
-            <!-- BLOG-POST-LIST:START -->
-            <!-- BLOG-POST-LIST:END -->
-            ```
-        
-        ''')
+    # gif_html = get_img_with_href('image_music\Description\Flow.png', 'https://docs.streamlit.io')
+    # st.markdown(gif_html, unsafe_allow_html=True)
+    
+    intro_markdown = read_markdown_file("./image_music/Description/md01.md")
+    st.markdown(intro_markdown, unsafe_allow_html=True)
 
 elif choice =="Play Music":
     st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -100,22 +124,43 @@ elif choice =="Play Music":
             sound.export(wav_file_path, format="wav")
 
             st.audio(wav_file_path, format='audio/wav')
+            guess_genres = st.multiselect("We Bet you can guess music genres based On the heard song", genres)
+            if st.button("Classification Musics!"):
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                remove_file_dir(dest_chunk)
+                #split file into many path
+                split_multi_chunk(wav_file_path, dest_chunk)
+                
+                progress_bar.progress(10)
+                status_text.text('Begin to classify is: %s percent' % 10)
 
-            remove_file_dir(dest_chunk)
-            #split file into many path
-            split_multi_chunk(wav_file_path, dest_chunk)
 
-            predict_list = []
-            for i, (dirpath, _, filenames) in enumerate(os.walk(dest_chunk)):
-                for f in filenames:
-                    file_path = os.path.join(dirpath, f)
-                    one_pitch = predict_cnn(file_path, model_load, num_segments=10)
-                    if one_pitch != "none":
-                        predict_list.append(genres[one_pitch])
-                    else:
-                        print('none predict')
+                predict_list = []
+                for i, (dirpath, _, filenames) in enumerate(os.walk(dest_chunk)):
+                    for f in filenames:
+                        file_path = os.path.join(dirpath, f)
+                        one_pitch = predict_cnn(file_path, model_load, num_segments=10)
+                        if one_pitch != "none":
+                            predict_list.append(genres[one_pitch])
+                        else:
+                            print('none predict')
 
-            image_list_genres = []
-            for genre_image in predict_list:
-                image_list_genres.append(os.path.join(image_music, genre_image+'.png'))
-            st.image(image_list_genres, caption= 'Music Genres', width=400)
+                progress_bar.progress(70)
+                status_text.text('Ready to classify .....')
+
+                image_list_genres = []
+                for genre_image in predict_list:
+                    image_list_genres.append(os.path.join(image_music, genre_image+'.png'))
+                st.image(image_list_genres, width=160)
+
+                predict_np = np.array(predict_list)
+                number_match = [x for x in predict_np if x in np.array(guess_genres)]
+
+                progress_bar.progress(80)
+                status_text.text('Ready to classify .....')
+                if len(number_match)>0:
+                    st.write("You guess correct of ",len(number_match))
+                    st.balloons()
+                progress_bar.progress(100)
+                status_text.text('Completed All Task!')
