@@ -219,7 +219,9 @@ elif choice =="Play Music":
             status_text.text('Completed All Task!')
 
         # selection_genre = st.empty()
+            
             selection_genre = st.radio('Select the genres', options=list_genres, key='4')
+            st.header(f'The suggest Song related '+selection_genre+' genre on Youtube')
             if selection_genre:
                 search_result = search_key_word(selection_genre)
                 search_result = search_result['items'][0]['id']['videoId']
@@ -235,8 +237,6 @@ elif choice =="Play Music":
                 with stat_col:  
                     st.subheader('Quick Statistics')
                     st.markdown('Total Number of Videos: `' + '{:,}'.format(int(youtuber_data.video_count())) + '`')
-                    st.markdown('Join Date: `' + str(youtuber_data.start_date()) + '`')
                     st.markdown('Total View Count:  `' + '{:,}'.format(int(youtuber_data.total_channel_views())) + '`')
                     st.markdown('Total Comments: `' + '{:,}'.format(int(youtuber_data.total_comments())) + '`')
-                    st.markdown('Total Watch Time: `' + str(youtuber_data.total_watchtime()) + '`')
                 st.write(youtuber_data.channel_description())
