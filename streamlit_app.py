@@ -51,6 +51,8 @@ def read_markdown_file(markdown_file):
     text = text.replace("![Screenshot](", "![Screenshot](http://localhost:8501/")
     return text
 
+st.set_page_config(layout="wide")
+
 @st.cache(allow_output_mutation=True)
 def load_model(path, weigth):
     return load__cnn_model(path, weigth)
@@ -109,8 +111,8 @@ if choice =="Home":
     st.markdown(intro_markdown, unsafe_allow_html=True)
 
 elif choice =="Feature Extractors":
-    st.subheader('Choose a mp3 file that you extracted MFCC features and plot it')
-    uploaded_file = st.file_uploader('Select', key="4")
+    st.header('Choose a mp3 file that you extracted MFCC features and plot it')
+    uploaded_file = st.file_uploader('Select', key="8")
     if uploaded_file is not None:
         audio_bytes = uploaded_file.read()
         
@@ -150,9 +152,9 @@ elif choice =="Feature Extractors":
 
 elif choice =="Play Music":
     st.set_option('deprecation.showfileUploaderEncoding', False)
-    st.image("image_music/Description/Music_Genre_Feature.jpg", width=800)
-    # st.subheader('Choose a mp3 file that you extracted from the work site')
-    uploaded_file = st.file_uploader('Choose a mp3 file that you extracted from the work site', key="1")
+    st.image("image_music/Description/Music_Genre_Feature.jpg", width=1080)
+    st.header('Let Play Around with Music')
+    uploaded_file = st.file_uploader('Upload Song', key="1")
     if uploaded_file:
         audio_bytes = uploaded_file.read()
         
@@ -222,7 +224,7 @@ elif choice =="Play Music":
                 search_result = search_key_word(selection_genre)
                 search_result = search_result['items'][0]['id']['videoId']
                 search_result = "https://www.youtube.com/watch?v="+search_result
-                st.write(search_result)
+                st.video(search_result)
                 youtuber_data = fetch_data(search_result)
                 df = youtuber_data.dataframe()
 
