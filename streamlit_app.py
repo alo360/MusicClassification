@@ -40,7 +40,8 @@ SAMPLE_RATE = 22050
 DURATION = 30
 SAMPLES_PER_TRACK = SAMPLE_RATE * DURATION
 
-genres, nb_train_samples = GetGenre(dataset_path)
+# genres, nb_train_samples = GetGenre(dataset_path)
+genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 # predict_list = []
 genres_np = np.array(genres)
 list_genres = []
