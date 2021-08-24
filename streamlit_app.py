@@ -39,7 +39,7 @@ data_music_path = "./musics/wav"
 SAMPLE_RATE = 22050
 DURATION = 30
 SAMPLES_PER_TRACK = SAMPLE_RATE * DURATION
-
+ 
 # genres, nb_train_samples = GetGenre(dataset_path)
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 # predict_list = []
@@ -197,6 +197,8 @@ elif choice =="Play Music":
                         predict_list.append(genres[one_pitch])
                     # else:
                     #     print('none predict')
+                    
+            predict_list = list(set(predict_list))
 
             progress_bar.progress(70)
             status_text.text('Ready to classify .....')
